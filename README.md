@@ -1,6 +1,6 @@
 # oneqaz-trading-mcp
 
-<!-- mcp-name: com.oneqaz/oneqaz-trading-mcp -->
+<!-- mcp-name: io.github.wnsod/oneqaz-trading-mcp -->
 
 > MCP server for **trading signals**, **market regime detection**, **position monitoring**, **Fear & Greed index**, and **cross-market pattern analysis**. Supports crypto, US stocks, and Korean stocks.
 
