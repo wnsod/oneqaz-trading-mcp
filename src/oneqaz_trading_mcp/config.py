@@ -24,6 +24,7 @@ def _detect_data_root() -> Path:
     return Path(__file__).parent.parent.parent.parent.resolve()
 
 DATA_ROOT = _detect_data_root()
+PROJECT_ROOT = DATA_ROOT  # alias for backward compatibility
 
 
 def _data_dir(default_rel: str, env_key: str) -> Path:
