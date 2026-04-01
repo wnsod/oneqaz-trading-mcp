@@ -151,6 +151,87 @@ def register_all_tools():
 
 
 # ---------------------------------------------------------------------------
+# Prompt templates
+# ---------------------------------------------------------------------------
+
+def register_prompts():
+    """Register MCP prompt templates for guided usage."""
+
+    @mcp.prompt()
+    def market_briefing() -> str:
+        """Get a full market briefing across all markets.
+        Covers global regime, Fear & Greed, and key signals for crypto, US, and Korean stocks."""
+        return (
+            "Give me a comprehensive market briefing. Read the following resources and synthesize:\n"
+            "1. market://global/summary — global macro regime\n"
+            "2. market://indicators/fear-greed — sentiment index\n"
+            "3. market://all/summary — all markets overview\n"
+            "4. market://unified/cross-market — cross-market patterns\n\n"
+            "Summarize: overall regime, key risks, opportunities, and recommended stance."
+        )
+
+    @mcp.prompt()
+    def should_i_buy(symbol: str, market: str = "crypto") -> str:
+        """Analyze whether a specific symbol is worth buying right now.
+        Combines signals, regime, and external context for the symbol."""
+        return (
+            f"Analyze whether {symbol.upper()} in {market} market is a good buy right now.\n\n"
+            f"Read these resources:\n"
+            f"1. market://{market}/status — current market regime\n"
+            f"2. market://{market}/unified/symbol/{symbol.lower()} — unified technical + external context\n"
+            f"3. market://indicators/fear-greed — sentiment\n"
+            f"4. Use get_signals tool with market_id='{market}', symbol='{symbol.lower()}'\n\n"
+            f"Provide: signal direction, confidence level, key risks, and entry suggestion."
+        )
+
+    @mcp.prompt()
+    def risk_check() -> str:
+        """Check current market risks and defensive signals.
+        Analyzes VIX, credit spreads, macro risks, and losing positions."""
+        return (
+            "Perform a risk assessment across all markets.\n\n"
+            "Read these resources:\n"
+            "1. market://global/summary — macro regime and risk levels\n"
+            "2. market://global/category/vix — volatility analysis\n"
+            "3. market://global/category/credit — credit spread analysis\n"
+            "4. market://indicators/fear-greed — extreme fear/greed detection\n\n"
+            "Summarize: current risk level, danger signals, and recommended defensive actions."
+        )
+
+    @mcp.prompt()
+    def portfolio_review(market: str = "crypto") -> str:
+        """Review current portfolio positions and performance.
+        Shows holdings, P&L, and suggests actions."""
+        return (
+            f"Review my current {market} portfolio.\n\n"
+            f"Use these tools:\n"
+            f"1. get_positions(market_id='{market}') — current holdings\n"
+            f"2. get_profitable_positions(market_id='{market}') — winners\n"
+            f"3. get_losing_positions(market_id='{market}') — losers\n"
+            f"4. Read market://{market}/status for regime context\n\n"
+            f"Provide: position summary, best/worst performers, and action suggestions based on current regime."
+        )
+
+    @mcp.prompt()
+    def cross_market_analysis() -> str:
+        """Compare crypto, US stocks, and Korean stocks.
+        Identifies divergences, correlations, and rotation opportunities."""
+        return (
+            "Compare all three markets: crypto, US stocks, and Korean stocks.\n\n"
+            "Read these resources:\n"
+            "1. market://crypto/status\n"
+            "2. market://us_stock/status\n"
+            "3. market://kr_stock/status\n"
+            "4. market://unified/cross-market\n"
+            "5. market://global/summary\n\n"
+            "Analyze: which market is strongest/weakest, any divergences, "
+            "correlation shifts, and where capital might rotate next."
+        )
+
+    logger.info("All prompts registered")
+
+
+# ---------------------------------------------------------------------------
 # Server lifecycle
 # ---------------------------------------------------------------------------
 
@@ -162,6 +243,7 @@ def create_app():
 
     register_all_resources()
     register_all_tools()
+    register_prompts()
     return mcp
 
 
