@@ -14,6 +14,16 @@
 - **SQLite-based**: No external database server required
 - **Stateless HTTP**: Compatible with any MCP client
 
+### Market Coverage
+
+| Market | Exchange | Universe | Symbols |
+|--------|----------|----------|---------|
+| Crypto | Bithumb | All listed pairs | ~440+ |
+| Korean Stocks | KOSPI/KOSDAQ | KOSPI 200 | ~200 |
+| US Stocks | NYSE/NASDAQ | S&P 500 | ~500 |
+
+All symbols are monitored 24/7 with automated signal generation, regime detection, and virtual trading.
+
 ## Quick Start
 
 ### Install
