@@ -2,17 +2,42 @@
 
 <!-- mcp-name: io.github.wnsod/oneqaz-trading-mcp -->
 
-> MCP server for **trading signals**, **market regime detection**, **position monitoring**, **Fear & Greed index**, and **cross-market pattern analysis**. Supports crypto, US stocks, and Korean stocks.
+> **The context layer for financial AI.**
+>
+> Your AI agent shouldn't just see prices — it should understand
+> what regime the market is in, which signals are actually working right now,
+> and how macro flows down to individual assets.
+>
+> OneQAZ provides this as a single MCP endpoint.
+> Crypto, US stocks, Korean stocks. 1,100+ symbols. 24/7 live.
 
 **Keywords**: MCP, trading, signals, market analysis, regime, portfolio, sentiment, technical analysis, crypto, stocks, Fear & Greed, cross-market, Claude, model context protocol
 
-## Features
+## Why OneQAZ
 
-- **8 Resource categories**: Global regime, market status, market structure, indicators (Fear & Greed), signals, external context (news/events), unified context, derived signals
-- **4 Tool types**: Trade history, positions, signals, and trading decisions — all with filtering and sorting
-- **Multi-market**: Supports crypto, Korean stocks (KR), and US stocks
-- **SQLite-based**: No external database server required
-- **Stateless HTTP**: Compatible with any MCP client
+Financial data APIs are everywhere. Market *intelligence* is not.
+
+| | Typical financial MCP | OneQAZ |
+|---|---|---|
+| Price / OHLCV data | ✅ | ✅ |
+| Technical indicators | ✅ | ✅ |
+| **Regime detection** (trending / ranging / volatile) | ❌ | ✅ |
+| **Self-correcting signals** (weighted by real outcomes) | ❌ | ✅ |
+| **Macro → ETF → Individual context chain** | ❌ | ✅ |
+| **Live 24/7 cloud API** | ❌ | ✅ |
+
+Signal weights are adjusted continuously based on actual trade outcomes
+per regime via Thompson Sampling — not static indicator thresholds.
+Every response includes an `_llm_summary` field optimized for AI consumption.
+
+## What your AI gets
+
+- **Regime detection**: Is the market trending, ranging, or volatile? Per-market and global
+- **Self-correcting signals**: 1,100+ symbols scored by Thompson Sampling on actual trade outcomes
+- **Macro context chain**: Global regime → bonds/forex/VIX/commodities → ETF/basket → individual symbol
+- **External context**: News events, fundamentals, cross-market correlation — pre-processed for LLM consumption
+- **19 Resources + 4 Tools**: Stateless HTTP, compatible with any MCP client
+- **`_llm_summary` on every response**: Human-readable text summary optimized for AI agent context windows
 
 ### Market Coverage
 
@@ -26,36 +51,9 @@ All symbols are monitored 24/7 with automated signal generation, regime detectio
 
 ## Quick Start
 
-### Install
+### Option 1: Live API — no install needed
 
-```bash
-pip install oneqaz-trading-mcp
-```
-
-### Initialize sample data
-
-```bash
-oneqaz-trading-mcp init
-```
-
-This creates sample SQLite databases with demo trading data so you can test immediately.
-
-### Start the server
-
-```bash
-oneqaz-trading-mcp serve
-```
-
-Server starts at `http://localhost:8010` by default.
-
-- Swagger UI: `http://localhost:8010/docs`
-- MCP endpoint: `http://localhost:8010/mcp`
-
-### Connect from Claude
-
-#### Live API (recommended — no install needed)
-
-Connect directly to our 24/7 live server with real-time market data:
+Real-time data, updated every minute.
 
 ```json
 {
@@ -67,9 +65,20 @@ Connect directly to our 24/7 live server with real-time market data:
 }
 ```
 
-#### Local (self-hosted with sample data)
+Ask Claude: *"What's the current market regime?"*
 
-If you prefer to run locally with demo data:
+### Option 2: Local (demo data)
+
+```bash
+pip install oneqaz-trading-mcp
+oneqaz-trading-mcp init    # creates sample SQLite databases
+oneqaz-trading-mcp serve   # starts at http://localhost:8010
+```
+
+- Swagger UI: `http://localhost:8010/docs`
+- MCP endpoint: `http://localhost:8010/mcp`
+
+Then connect from Claude:
 
 ```json
 {
@@ -83,87 +92,68 @@ If you prefer to run locally with demo data:
 
 ## Use Cases
 
-### 1. Ask Claude about market conditions
+### 1. Give your AI agent market awareness
 
-Once connected, just ask Claude in natural language:
-
-```
-You: "What's the current market regime for crypto?"
-
-Claude reads market://crypto/status and responds:
-  "Crypto is currently in a sideways_bullish regime.
-   Fear & Greed index is at 68 (Greed).
-   3 active BUY signals with avg score 0.78."
-```
-
-```
-You: "Show me the best performing positions in US stocks"
-
-Claude calls get_positions(market_id="us_stock", sort_by="roi", sort_order="desc") and responds:
-  "Top positions:
-   1. NVDA — +12.3% ROI (trend_continuation strategy)
-   2. AAPL — +8.1% ROI (breakout strategy)
-   3. MSFT — +5.4% ROI (momentum strategy)"
-```
-
-```
-You: "Any macro risks I should know about?"
-
-Claude reads market://global/summary and responds:
-  "Global regime: neutral (score: 0.12)
-   - Bonds: bearish, rising yields
-   - VIX: elevated, risk_level=high
-   - Commodities: bullish, gold at ATH
-   Recommendation: defensive positioning suggested."
-```
-
-### 2. Build an AI trading assistant
-
-Connect the MCP server to your own AI application:
+Connect OneQAZ and your agent understands market context without you building the pipeline:
 
 ```python
-# Your AI app reads market intelligence from OneQAZ
-regime = mcp.read("market://crypto/status")
-signals = mcp.call("get_signals", market_id="crypto", min_score=0.7)
-fear_greed = mcp.read("market://indicators/fear-greed")
+# Your agent reads regime + signals + macro in one call
+context = mcp.read("market://crypto/unified")
 
-# Your AI decides what to do with this context
+# Or go granular
+regime = mcp.read("market://crypto/status")          # what phase is the market in?
+signals = mcp.call("get_signals", market_id="crypto", min_score=0.7)  # what's working now?
+macro = mcp.read("market://global/summary")           # what's driving this from above?
+
+# Feed to your agent's decision layer
 prompt = f"""
-  Market regime: {regime}
+  Regime: {regime}
   High-confidence signals: {signals}
-  Sentiment: {fear_greed}
+  Macro context: {macro}
 
-  Should the user buy, hold, or sell?
+  Recommend portfolio action.
 """
 ```
 
-### 3. Cross-market analysis
+### 2. Build a regime-aware trading system
 
-```
-You: "Compare crypto vs US stock market conditions"
+Your AI reacts differently based on market state — no hardcoded rules:
 
-Claude reads:
-  - market://crypto/status
-  - market://us_stock/status
-  - market://unified/cross-market
+```python
+regime = mcp.read("market://us_stock/status")
+structure = mcp.read("market://us_stock/structure")
 
-Claude: "Crypto is bullish while US stocks are neutral.
-   Cross-market correlation is weakening — crypto is
-   decoupling from equity risk sentiment.
-   This pattern historically precedes crypto outperformance."
+if regime["regime"]["stage"] == "volatile":
+    signals = mcp.call("get_signals", market_id="us_stock", action_filter="DEFENSIVE")
+else:
+    signals = mcp.call("get_signals", market_id="us_stock", min_score=0.7)
 ```
 
-### 4. Signal monitoring
+### 3. Cross-market macro→micro analysis
+
+Trace how macro shifts flow into individual assets:
+
+```python
+# Macro layer
+global_regime = mcp.read("market://global/summary")
+bonds = mcp.read("market://global/category/bonds")
+
+# Cross-market correlation
+cross = mcp.read("market://unified/cross-market")
+
+# Down to individual symbol with full context chain
+symbol_ctx = mcp.read("market://us_stock/unified/symbol/NVDA")
+```
+
+### 4. Ask Claude directly
+
+Already using Claude? Just connect and ask:
 
 ```
-You: "What BUY signals fired in the last 24 hours for Korean stocks?"
-
-Claude calls get_signals(market_id="kr_stock", action_filter="BUY"):
-  "12 BUY signals in KR market:
-   - Samsung (005930): score 0.85, trend_continuation
-   - SK Hynix (000660): score 0.79, breakout
-   - POSCO (005490): score 0.71, mean_reversion
-   ..."
+"What's the current market regime for crypto?"
+"Show me the best performing positions in US stocks"
+"Any macro risks I should know about?"
+"Compare crypto vs US stock conditions"
 ```
 
 ## Sample Response
@@ -271,6 +261,26 @@ docker run -p 8010:8010 oneqaz-trading-mcp
     ├── kr_market/external_context.db
     └── us_market/external_context.db
 ```
+
+## Rate Limits
+
+The live API (`api.oneqaz.com/mcp`) has rate limits to ensure fair usage:
+
+| Limit | Value | Description |
+|-------|-------|-------------|
+| Daily quota | 1,500 requests/IP | Resets every 24 hours |
+| Burst limit | 30 requests/min/IP | Prevents overloading |
+
+**What this means:**
+- Monitor 2-3 symbols all day: ~500-800 requests → no problem
+- Scan entire market once: ~1,200-1,500 requests → fits in daily quota
+- Exceeding limits returns HTTP 429 with `Retry-After` header
+
+**Response headers** on every request:
+- `X-RateLimit-Daily-Remaining`: requests left today
+- `X-RateLimit-Minute-Remaining`: requests left this minute
+
+Local self-hosted servers (`localhost`) have no rate limits.
 
 ## Disclaimer
 
