@@ -1,0 +1,11 @@
+{
+  "name": "oneqaz-trading",
+  "description": "Live trading intelligence — real-time market data, signals, positions, and macro analysis for crypto, Korean stocks, and US stocks.",
+  "version": "1.0.0",
+  "mcpServers": {
+    "oneqaz-trading": {
+      "type": "streamable-http",
+      "url": "https://api.oneqaz.com/mcp"
+    }
+  }
+}

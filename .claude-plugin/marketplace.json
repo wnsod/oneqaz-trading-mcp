@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "oneqaz-trading-mcp",
+  "description": "Live trading intelligence MCP for crypto, Korean stocks, and US stocks",
+  "owner": {
+    "name": "OneQAZ",
+    "email": "oneqaz.trading@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "oneqaz-trading",
+      "source": "./plugins/oneqaz-trading",
+      "description": "Live market data, signals, positions, and macro analysis across crypto, KR stocks, and US stocks. Connects to api.oneqaz.com/mcp (free tier: 1,500 req/day).",
+      "version": "1.0.0",
+      "author": {
+        "name": "OneQAZ"
+      },
+      "homepage": "https://github.com/oneqaz-trading/oneqaz-trading-mcp",
+      "category": "productivity",
+      "keywords": ["trading", "market-data", "crypto", "stocks", "signals", "regime", "macro", "finance"]
+    }
+  ]
+}
